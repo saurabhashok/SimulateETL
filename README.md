@@ -17,9 +17,8 @@ Before running the code, make sure you have the following prerequisites in place
    pip install mysql-connector-python pandas psycopg2
 
 
-   MySQL server up and running with the database you want to extract data from.
-
-Amazon Redshift cluster ready to receive the transformed data.
+1. MySQL server up and running with the database you want to extract data from.
+2. Amazon Redshift cluster ready to receive the transformed data.
 
 ### Configuration
 To configure the project, you need to set the following environment variables:
