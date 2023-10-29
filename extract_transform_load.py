@@ -1,4 +1,5 @@
 import mysql.connector
+import redshift_connector
 import pytest
 import pandas as pd
 import numpy as np
@@ -9,6 +10,12 @@ DB_USERNAME = os.environ.get('DB_USERNAME')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = os.environ.get('DB_HOST')
 DB_DATABASE = os.environ.get('DB_DATABASE')
+
+REDSHIFT_HOST = os.environ.get('REDSHIFT_HOST')
+REDSHIFT_PORT = os.environ.get('REDSHIFT_PORT')
+REDSHIFT_USER = os.environ.get('REDSHIFT_USER')
+REDSHIFT_PASSWORD = os.environ.get('REDSHIFT_PASSWORD')
+REDSHIFT_DATABASE = os.environ.get('REDSHIFT_DATABASE')
 
 with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, user=DB_USERNAME, password=DB_PASSWORD) as conn, open('exported.dat', 'w') as output:
     cursor = conn.cursor()
@@ -28,6 +35,14 @@ with open('exported.dat', 'r') as exported_file, open('transformed.dat', 'w') as
             id, StringA, StringB, flag = line
             transformed_string = StringB.upper() + '_'
             transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}")
+
+
+
+# with redshift_connector.connector(host=REDSHIFT_HOST, database=REDSHIFT_DATABASE, user=REDSHIFT_USER, password=REDSHIFT_PASSWORD) as redshift_conn:
+#     cursor = redshift_conn.cursor()
+#     query =
+
+
 
 
 @pytest.fixture
