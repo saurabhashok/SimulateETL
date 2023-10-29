@@ -53,9 +53,8 @@ This README provides a high-level overview. For detailed implementation, refer t
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-Acknowledgments
-MySQL Connector/Python Documentation
-Psycopg2 Documentation
-Amazon Redshift Documentation
-Pandas Documentation
-Feel free to customize this README to match the specific details of your project and provide additional instructions or information as needed.
+### Acknowledgments
+- MySQL Connector/Python Documentation
+- Psycopg2 Documentation
+- Amazon Redshift Documentation
+- Pandas Documentation
