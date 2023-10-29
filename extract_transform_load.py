@@ -23,6 +23,8 @@ REDSHIFT_USER = os.environ.get('REDSHIFT_USER')
 REDSHIFT_PASSWORD = os.environ.get('REDSHIFT_PASSWORD')
 REDSHIFT_DATABASE = os.environ.get('REDSHIFT_DATABASE')
 
+AWS_ARN = os.environ.get('AWS_ARN')
+
 
 with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, user=DB_USERNAME, password=DB_PASSWORD) as conn, open('exported.dat', 'w') as output:
     cursor = conn.cursor()
@@ -41,7 +43,7 @@ with open('exported.dat', 'r') as exported_file, open('transformed.dat', 'w') as
         if len(line) == 4:
             id, StringA, StringB, flag = line
             transformed_string = StringB.upper() + '_'
-            transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}")
+            transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}\n")
 
 
 #Create a s3 bucket in AWS
@@ -99,30 +101,39 @@ file_path = 'transformed.dat'
 
 upload_file_s3(object_key, file_path, aws_bucket_name)
 
-s3_uri = 's3://hosted-data-bucket/exported.dat'
+s3_uri = f's3://{aws_bucket_name}/{object_key}'
+print(s3_uri)
 
-with redshift_connector.connect(host=REDSHIFT_HOST, database=REDSHIFT_DATABASE, user=REDSHIFT_USER, password=REDSHIFT_PASSWORD) as redshift_conn:
+with redshift_connector.connect(host=REDSHIFT_HOST,port= REDSHIFT_PORT,database=REDSHIFT_DATABASE,user=REDSHIFT_USER,password=REDSHIFT_PASSWORD) as redshift_conn:
     cursor = redshift_conn.cursor()
-    table_name = "internex_data"
+    table_name = 'internex'
 
     create_redshift_table = f"""
-    CREATE TABLE IF NOT EXISTS table_name(
+    CREATE TABLE IF NOT EXISTS data.{table_name}(
                  id INT PRIMARY KEY,
                  StringA varchar(20),
                  StringB varchar(20),
                 flag BOOLEAN
     )
     """
-    cursor.execute(create_redshift_table)
+    try:
+        cursor.execute(create_redshift_table)
+        redshift_conn.commit()
+        print(f"The table {table_name} was successfully created.")
+    except Exception as e:
+        print(f"The query failed, {str(e)}")
 
-    copy_data_redshift = """
-                   COPY data
-				   FROM {s3_uri}
-				   CREDENTIALS 'aws_access_key_id={aws_access_key};
-				   aws_secret_access_key={aws_secret_key}'
-				   DELIMTER '\t';
-			        """
+
+    copy_data_redshift = f"""
+                   COPY data.{table_name}
+				   FROM '{s3_uri}'
+                   IAM_ROLE '{AWS_ARN}'
+                   DELIMITER '\t';
+                   """
+
     cursor.execute(copy_data_redshift)
+    redshift_conn.commit()
+    print(f"The data from {object_key} was successfully exported to {table_name}")
 
 @pytest.fixture
 def df():
