@@ -21,7 +21,7 @@ Before running the code, make sure you have the following prerequisites in place
 
 Amazon Redshift cluster ready to receive the transformed data.
 
-Configuration
+### Configuration
 To configure the project, you need to set the following environment variables:
 
 - MYSQL_HOST: Hostname or IP address of the MySQL server
@@ -34,12 +34,12 @@ To configure the project, you need to set the following environment variables:
 - REDSHIFT_USER: Redshift username
 - REDSHIFT_PASSWORD: Redshift password
 
-Running the Code
-Clone this repository to your local machine.
-Configure the environment variables as described in the "Configuration" section.
-Run the data extraction and transformation script:
-python extract_transform_load.py
-This script will perform the following steps:
+Running the Code:
+1.Clone this repository to your local machine.
+2. Configure the environment variables as described in the "Configuration" section.
+3. Run the data extraction and transformation script:
+4. python extract_transform_load.py
+5. This script will perform the following steps:
 
 Extract data from the MySQL database.
 Export the data to a .dat file.
@@ -47,10 +47,11 @@ Apply necessary data transformations (modify strings, etc.).
 Load the transformed data into the Redshift database.
 Check the Redshift database to ensure the data has been successfully loaded.
 
-Notes
-Make sure to handle sensitive information like passwords and access keys securely.
-This README provides a high-level overview. For detailed implementation, refer to the code comments and documentation within the Python script.
-License
+### Notes
+- Make sure to handle sensitive information like passwords and access keys securely.
+- This README provides a high-level overview. For detailed implementation, refer to the code comments and documentation within the Python script.
+
+### License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Acknowledgments
