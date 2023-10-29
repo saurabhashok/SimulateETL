@@ -46,7 +46,7 @@ This script will perform the following steps:
 - Apply necessary data transformations (modify strings, etc.).
 - Load the transformed data into the Redshift database.
 
-4.Check the Redshift database to ensure the data has been successfully loaded.
+4. Check the Redshift database to ensure the data has been successfully loaded.
 
 ### Notes
 - Make sure to handle sensitive information like passwords and access keys securely.

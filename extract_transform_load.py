@@ -10,17 +10,24 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = os.environ.get('DB_HOST')
 DB_DATABASE = os.environ.get('DB_DATABASE')
 
-with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, username=DB_USERNAME, password=DB_PASSWORD) as conn,open('exported.dat', 'w') as output:
-        cursor = conn.cursor()
-        sql_query = """
-        select * from my_data
-        where flag = true
-        """
-        cursor.execute(sql_query)
-        data = cursor.fetchall()
-        for row in data:
-            # map function is used to apply a string function to an iterable
-            output.write('\t'.join(map(str,row)) + '\n')
+with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, user=DB_USERNAME, password=DB_PASSWORD) as conn, open('exported.dat', 'w') as output:
+    cursor = conn.cursor()
+    sql_query = """
+    SELECT * FROM my_data
+    WHERE flag = true
+    """
+    cursor.execute(sql_query)
+    data = cursor.fetchall()
+    for row in data:
+        output.write('\t'.join(map(str, row)) + '\n')
+
+with open('exported.dat', 'r') as exported_file, open('transformed.dat', 'w') as transformed_file:
+    for row in exported_file:
+        line = row.strip().split('\t')
+        if len(line) == 4:
+            id, StringA, StringB, flag = line
+            transformed_string = StringB.upper() + '_'
+            transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}")
 
 
 @pytest.fixture
