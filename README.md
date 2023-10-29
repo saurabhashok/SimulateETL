@@ -24,15 +24,15 @@ Amazon Redshift cluster ready to receive the transformed data.
 Configuration
 To configure the project, you need to set the following environment variables:
 
-MYSQL_HOST: Hostname or IP address of the MySQL server.
-MYSQL_USER: MySQL username.
-MYSQL_PASSWORD: MySQL password.
-MYSQL_DB: Name of the MySQL database.
-REDSHIFT_HOST: Hostname or endpoint of your Amazon Redshift cluster.
-REDSHIFT_PORT: Port number for the Redshift database.
-REDSHIFT_DB: Name of the Redshift database.
-REDSHIFT_USER: Redshift username.
-REDSHIFT_PASSWORD: Redshift password.
+- MYSQL_HOST: Hostname or IP address of the MySQL server
+- MYSQL_USER: MySQL username
+- MYSQL_PASSWORD: MySQL password
+- MYSQL_DB: Name of the MySQL database
+- REDSHIFT_HOST: Hostname or endpoint of your Amazon Redshift cluster
+- REDSHIFT_PORT: Port number for the Redshift database
+- REDSHIFT_DB: Name of the Redshift database
+- REDSHIFT_USER: Redshift username
+- REDSHIFT_PASSWORD: Redshift password
 
 Running the Code
 Clone this repository to your local machine.
