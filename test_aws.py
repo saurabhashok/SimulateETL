@@ -1,8 +1,7 @@
 import boto3  # pip install boto3
 
 # Let's use Amazon S3
-s3 = boto3.client('s3', region_name='ap-south-1',aws_access_key_id='AKIA5HY4OROZKOR66G4I',
-    aws_secret_access_key='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')
+
 
 # response = s3.list_buckets()
 #

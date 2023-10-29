@@ -67,7 +67,6 @@ def create_bucket(bucket_name, region=None):
             print(f"S3 bucket {bucket_name} is created successfully")
         except Exception as e:
             print(f"failed to create the bucket: {e}")
-
     else:
         print(f"The bucket {bucket_name} already exists in AWS S3")
 
@@ -100,11 +99,30 @@ file_path = 'transformed.dat'
 
 upload_file_s3(object_key, file_path, aws_bucket_name)
 
-# with redshift_connector.connector(host=REDSHIFT_HOST, database=REDSHIFT_DATABASE, user=REDSHIFT_USER, password=REDSHIFT_PASSWORD) as redshift_conn:
-#     cursor = redshift_conn.cursor()
-#     query =
+s3_uri = 's3://hosted-data-bucket/exported.dat'
 
+with redshift_connector.connect(host=REDSHIFT_HOST, database=REDSHIFT_DATABASE, user=REDSHIFT_USER, password=REDSHIFT_PASSWORD) as redshift_conn:
+    cursor = redshift_conn.cursor()
+    table_name = "internex_data"
 
+    create_redshift_table = f"""
+    CREATE TABLE IF NOT EXISTS table_name(
+                 id INT PRIMARY KEY,
+                 StringA varchar(20),
+                 StringB varchar(20),
+                flag BOOLEAN
+    )
+    """
+    cursor.execute(create_redshift_table)
+
+    copy_data_redshift = """
+                   COPY data
+				   FROM {s3_uri}
+				   CREDENTIALS 'aws_access_key_id={aws_access_key};
+				   aws_secret_access_key={aws_secret_key}'
+				   DELIMTER '\t';
+			        """
+    cursor.execute(copy_data_redshift)
 
 @pytest.fixture
 def df():
