@@ -9,7 +9,7 @@ This Python project is designed to extract data from a MySQL database, export it
 
 Before running the code, make sure you have the following prerequisites in place:
 
-1. Python 3 installed on your system.
+1. Python 3 installed on your system
 
 2. Required Python packages installed. You can install them using pip:
 
@@ -17,7 +17,7 @@ Before running the code, make sure you have the following prerequisites in place
    pip install mysql-connector-python pandas psycopg2
 
 
-1. MySQL server up and running with the database you want to extract data from.
+-  MySQL server up and running with the database you want to extract data from.
 2. Amazon Redshift cluster ready to receive the transformed data.
 
 ### Configuration
@@ -34,10 +34,10 @@ To configure the project, you need to set the following environment variables:
 - REDSHIFT_PASSWORD: Redshift password
 
 Running the Code:
-1. Clone this repository to your local machine.
-2. Configure the environment variables as described in the "Configuration" section.
+1. Clone this repository to your local machine
+2. Configure the environment variables as described in the "Configuration" section
 3. Run the data extraction and transformation script:
-   ``` python
+   ``` bash
    python extract_transform_load.py
 
 This script will perform the following steps:
