@@ -35,7 +35,7 @@ To configure the project, you need to set the following environment variables:
 - REDSHIFT_PASSWORD: Redshift password
 
 Running the Code:
-1.Clone this repository to your local machine.
+1. Clone this repository to your local machine.
 2. Configure the environment variables as described in the "Configuration" section.
 3. Run the data extraction and transformation script:
 4. python extract_transform_load.py
