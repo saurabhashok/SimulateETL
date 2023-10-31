@@ -25,26 +25,42 @@ REDSHIFT_DATABASE = os.environ.get('REDSHIFT_DATABASE')
 
 AWS_ARN = os.environ.get('AWS_ARN')
 
+def extract_data(input_file):
+    try:
+        with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, user=DB_USERNAME, password=DB_PASSWORD) as conn, open(input_file, 'w') as output:
+            cursor = conn.cursor()
+            sql_query = """
+            SELECT * FROM my_data
+            WHERE flag = true
+            """
+            cursor.execute(sql_query)
+            data = cursor.fetchall()
+            for row in data:
+                output.write('\t'.join(map(str, row)) + '\n')
+            print(f"The data has been extracted and saved in {input_file}")
 
-with mysql.connector.connect(host=DB_HOST, database=DB_DATABASE, user=DB_USERNAME, password=DB_PASSWORD) as conn, open('exported.dat', 'w') as output:
-    cursor = conn.cursor()
-    sql_query = """
-    SELECT * FROM my_data
-    WHERE flag = true
-    """
-    cursor.execute(sql_query)
-    data = cursor.fetchall()
-    for row in data:
-        output.write('\t'.join(map(str, row)) + '\n')
+    except Exception as e:
+     	print(f"Data export error: {str(e)}")
 
-with open('exported.dat', 'r') as exported_file, open('transformed.dat', 'w') as transformed_file:
-    for row in exported_file:
-        line = row.strip().split('\t')
-        if len(line) == 4:
-            id, StringA, StringB, flag = line
-            transformed_string = StringB.upper() + '_'
-            transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}\n")
+input_file = "exported.dat"
+extract_data(input_file)
 
+def transform_data(input_file, output_file):
+    try:
+        with open(input_file, 'r') as exported_file, open(output_file, 'w') as transformed_file:
+            for row in exported_file:
+                line = row.strip().split('\t')
+                if len(line) == 4:
+                    id, StringA, StringB, flag = line
+                    transformed_string = StringB.upper() + '_'
+                    transformed_file.write(f"{id}\t{transformed_string}\t{StringB}\t{flag}\n")
+            print(f"The data has been transformed and saved in {output_file}")
+
+    except Exception as e:
+        print(f"Data transform error: {str(e)}")
+
+output_file = 'transformed.dat'
+transform_data(input_file,output_file)
 
 #Create a s3 bucket in AWS
 def create_bucket(bucket_name, region=None):
@@ -104,36 +120,43 @@ upload_file_s3(object_key, file_path, aws_bucket_name)
 s3_uri = f's3://{aws_bucket_name}/{object_key}'
 print(s3_uri)
 
-with redshift_connector.connect(host=REDSHIFT_HOST,port= REDSHIFT_PORT,database=REDSHIFT_DATABASE,user=REDSHIFT_USER,password=REDSHIFT_PASSWORD) as redshift_conn:
-    cursor = redshift_conn.cursor()
-    table_name = 'internex'
+def load_data(table_name):
 
-    create_redshift_table = f"""
-    CREATE TABLE IF NOT EXISTS data.{table_name}(
-                 id INT PRIMARY KEY,
-                 StringA varchar(20),
-                 StringB varchar(20),
-                flag BOOLEAN
-    )
-    """
     try:
-        cursor.execute(create_redshift_table)
-        redshift_conn.commit()
-        print(f"The table {table_name} was successfully created.")
+
+        with redshift_connector.connect(host=REDSHIFT_HOST,port= REDSHIFT_PORT,database=REDSHIFT_DATABASE,user=REDSHIFT_USER,password=REDSHIFT_PASSWORD) as redshift_conn:
+            cursor = redshift_conn.cursor()
+
+            create_redshift_table = f"""
+            CREATE TABLE IF NOT EXISTS data.{table_name}(
+                         id INT PRIMARY KEY,
+                         StringA varchar(20),
+                         StringB varchar(20),
+                        flag BOOLEAN
+            )
+            """
+            cursor.execute(create_redshift_table)
+            redshift_conn.commit()
+            print(f"The table {table_name} was successfully created.")
+
+
+            copy_data_redshift = f"""
+                           COPY data.{table_name}
+        				   FROM '{s3_uri}'
+                           IAM_ROLE '{AWS_ARN}'
+                           DELIMITER '\t';
+                           """
+
+            cursor.execute(copy_data_redshift)
+            redshift_conn.commit()
+            print(f"The data from {object_key} was successfully exported to {table_name}")
+
     except Exception as e:
-        print(f"The query failed, {str(e)}")
+         print(f"Data loading error: {str(e)}")
 
+table_name = 'internex'
+load_data(table_name)
 
-    copy_data_redshift = f"""
-                   COPY data.{table_name}
-				   FROM '{s3_uri}'
-                   IAM_ROLE '{AWS_ARN}'
-                   DELIMITER '\t';
-                   """
-
-    cursor.execute(copy_data_redshift)
-    redshift_conn.commit()
-    print(f"The data from {object_key} was successfully exported to {table_name}")
 
 @pytest.fixture
 def df():
@@ -155,7 +178,7 @@ def test_col_datatype(df):
     assert (df['StringA'].dtype == np.str_ ), "There are values other than string datatype"
 
 def test_col_flag_check(df):
-    assert set(df.flag.unique()) == {1, 0}, 'flag has other values'
+    assert set(df.flag.unique()) == {1, 0}, 'Flag has other unintended values'
 
 test_path = '/Users/saurabh/Documents/Elastic/test.py'
 pytest.main([test_path])
